@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Avatar Bet Game - Cryptocurrency Mini App</title>
+    <title>5COIN - Avatar Bet Game</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
@@ -152,10 +152,6 @@
             gap: 10px;
         }
         
-        .card-title i {
-            font-size: 1.4rem;
-        }
-        
         .btn {
             background: var(--primary);
             color: white;
@@ -252,20 +248,6 @@
             font-weight: bold;
         }
         
-        .market-list {
-            list-style: none;
-        }
-        
-        .market-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px;
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 10px;
-            margin-bottom: 10px;
-        }
-        
         .avatar-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -282,7 +264,7 @@
             transition: all 0.3s;
         }
         
-        .avatar-card:hover {
+        .avatar-card:hover, .avatar-card.active {
             transform: scale(1.05);
             background: rgba(0, 0, 0, 0.4);
         }
@@ -303,6 +285,21 @@
             font-size: 0.9rem;
         }
         
+        .loader {
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 5px solid var(--primary);
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
         @media (max-width: 600px) {
             .coin-grid {
                 grid-template-columns: repeat(2, 1fr);
@@ -311,24 +308,29 @@
             .avatar-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
+            
+            .user-info {
+                flex-direction: column;
+                gap: 15px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>Avatar Bet Game</h1>
+            <h1>5COIN - Avatar Bet Game</h1>
             <p>Collect, trade, and win with cryptocurrency!</p>
         </header>
         
         <div class="user-info">
             <div class="user">
-                <span>👤 User1234</span>
+                <span>👤 <span id="user-name">Loading...</span></span>
             </div>
             <div class="wallet">
-                <div class="coin-badge"><div class="coin-icon nc"></div> NC: 12.45</div>
-                <div class="coin-badge"><div class="coin-icon sc"></div> SC: 0.34</div>
-                <div class="coin-badge"><div class="coin-icon gc"></div> GC: 0.02</div>
+                <div class="coin-badge"><div class="coin-icon nc"></div> NC: <span id="nc-amount">0</span></div>
+                <div class="coin-badge"><div class="coin-icon sc"></div> SC: <span id="sc-amount">0</span></div>
+                <div class="coin-badge"><div class="coin-icon gc"></div> GC: <span id="gc-amount">0</span></div>
             </div>
         </div>
         
@@ -337,7 +339,6 @@
                 <div class="nav-tab active" data-tab="dashboard">Dashboard</div>
                 <div class="nav-tab" data-tab="bet">Place Bets</div>
                 <div class="nav-tab" data-tab="swap">Swap Coins</div>
-                <div class="nav-tab" data-tab="market">Marketplace</div>
                 <div class="nav-tab" data-tab="referral">Refer Friends</div>
                 <div class="nav-tab" data-tab="withdraw">Withdraw</div>
             </div>
@@ -350,35 +351,35 @@
                         <div class="coin-card">
                             <div class="coin-icon nc"></div>
                             <div class="coin-name">Normal Coin (NC)</div>
-                            <div class="coin-value">12.45</div>
-                            <div>≈ 248.99 ETB</div>
+                            <div class="coin-value" id="dashboard-nc">0</div>
+                            <div>≈ <span id="nc-etb">0</span> ETB</div>
                         </div>
                         <div class="coin-card">
                             <div class="coin-icon sc"></div>
                             <div class="coin-name">Silver Coin (SC)</div>
-                            <div class="coin-value">0.34</div>
-                            <div>≈ 680.00 ETB</div>
+                            <div class="coin-value" id="dashboard-sc">0</div>
+                            <div>≈ <span id="sc-etb">0</span> ETB</div>
                         </div>
                         <div class="coin-card">
                             <div class="coin-icon gc"></div>
                             <div class="coin-name">Gold Coin (GC)</div>
-                            <div class="coin-value">0.02</div>
-                            <div>≈ 400.00 ETB</div>
+                            <div class="coin-value" id="dashboard-gc">0</div>
+                            <div>≈ <span id="gc-etb">0</span> ETB</div>
                         </div>
                         <div class="coin-card">
                             <div class="coin-icon dc"></div>
                             <div class="coin-name">Diamond Coin (DC)</div>
-                            <div class="coin-value">0.00</div>
-                            <div>≈ 0.00 ETB</div>
+                            <div class="coin-value" id="dashboard-dc">0</div>
+                            <div>≈ <span id="dc-etb">0</span> ETB</div>
                         </div>
                         <div class="coin-card">
                             <div class="coin-icon ska"></div>
                             <div class="coin-name">SKA Coin</div>
-                            <div class="coin-value">0.00</div>
-                            <div>≈ 0.00 ETB</div>
+                            <div class="coin-value" id="dashboard-ska">0</div>
+                            <div>≈ <span id="ska-etb">0</span> ETB</div>
                         </div>
                     </div>
-                    <button class="btn btn-block">💰 Receive 5 Free Coins</button>
+                    <button class="btn btn-block" id="claim-coins">💰 Claim 5 Free Coins</button>
                 </div>
                 
                 <div class="card">
@@ -393,19 +394,19 @@
                 <div class="card">
                     <h3 class="card-title">🎯 Select Avatar to Bet On</h3>
                     <div class="avatar-grid">
-                        <div class="avatar-card">
+                        <div class="avatar-card" data-avatar="warrior">
                             <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='40' r='30' fill='%23%23f39c12'/%3E%3Ccircle cx='50' cy='100' r='40' fill='%23%232ecc71'/%3E%3C/svg%3E" class="avatar-img">
                             <div>Warrior</div>
                         </div>
-                        <div class="avatar-card">
+                        <div class="avatar-card" data-avatar="mage">
                             <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='40' r='30' fill='%23%239b59b6'/%3E%3Ccircle cx='50' cy='100' r='40' fill='%23%233498db'/%3E%3C/svg%3E" class="avatar-img">
                             <div>Mage</div>
                         </div>
-                        <div class="avatar-card">
+                        <div class="avatar-card" data-avatar="archer">
                             <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='40' r='30' fill='%23%23e74c3c'/%3E%3Ccircle cx='50' cy='100' r='40' fill='%23%23e67e22'/%3E%3C/svg%3E" class="avatar-img">
                             <div>Archer</div>
                         </div>
-                        <div class="avatar-card">
+                        <div class="avatar-card" data-avatar="rogue">
                             <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='40' r='30' fill='%23%23343a40'/%3E%3Ccircle cx='50' cy='100' r='40' fill='%23%237f8c8d'/%3E%3C/svg%3E" class="avatar-img">
                             <div>Rogue</div>
                         </div>
@@ -413,21 +414,21 @@
                     
                     <div class="form-group">
                         <label class="form-label">Select Coin Type:</label>
-                        <select class="form-input">
-                            <option>Normal Coin (NC)</option>
-                            <option>Silver Coin (SC)</option>
-                            <option>Gold Coin (GC)</option>
-                            <option>Diamond Coin (DC)</option>
-                            <option>SKA Coin</option>
+                        <select class="form-input" id="bet-coin-type">
+                            <option value="nc">Normal Coin (NC)</option>
+                            <option value="sc">Silver Coin (SC)</option>
+                            <option value="gc">Gold Coin (GC)</option>
+                            <option value="dc">Diamond Coin (DC)</option>
+                            <option value="ska">SKA Coin</option>
                         </select>
                     </div>
                     
                     <div class="form-group">
                         <label class="form-label">Amount to Bet:</label>
-                        <input type="number" class="form-input" placeholder="Enter amount" step="0.0001">
+                        <input type="number" class="form-input" id="bet-amount" placeholder="Enter amount" step="0.0001">
                     </div>
                     
-                    <button class="btn btn-success btn-block">🎲 Place Bet</button>
+                    <button class="btn btn-success btn-block" id="place-bet">🎲 Place Bet</button>
                 </div>
             </div>
             
@@ -438,39 +439,39 @@
                     
                     <div class="form-group">
                         <label class="form-label">From:</label>
-                        <select class="form-input">
-                            <option>Normal Coin (NC)</option>
-                            <option>Silver Coin (SC)</option>
-                            <option>Gold Coin (GC)</option>
-                            <option>Diamond Coin (DC)</option>
-                            <option>SKA Coin</option>
+                        <select class="form-input" id="swap-from">
+                            <option value="nc">Normal Coin (NC)</option>
+                            <option value="sc">Silver Coin (SC)</option>
+                            <option value="gc">Gold Coin (GC)</option>
+                            <option value="dc">Diamond Coin (DC)</option>
+                            <option value="ska">SKA Coin</option>
                         </select>
                     </div>
                     
                     <div class="form-group">
                         <label class="form-label">To:</label>
-                        <select class="form-input">
-                            <option>Silver Coin (SC)</option>
-                            <option>Gold Coin (GC)</option>
-                            <option>Diamond Coin (DC)</option>
-                            <option>SKA Coin</option>
-                            <option>Normal Coin (NC)</option>
+                        <select class="form-input" id="swap-to">
+                            <option value="sc">Silver Coin (SC)</option>
+                            <option value="gc">Gold Coin (GC)</option>
+                            <option value="dc">Diamond Coin (DC)</option>
+                            <option value="ska">SKA Coin</option>
+                            <option value="nc">Normal Coin (NC)</option>
                         </select>
                     </div>
                     
                     <div class="form-group">
                         <label class="form-label">Amount:</label>
-                        <input type="number" class="form-input" placeholder="Minimum 0.025 NC" step="0.0001">
+                        <input type="number" class="form-input" id="swap-amount" placeholder="Minimum 0.025 NC" step="0.0001">
                     </div>
                     
                     <div class="card">
                         <h4>Transaction Details</h4>
-                        <p>Exchange Rate: 1 NC = 10 SC</p>
-                        <p>Transaction Fee: 0.00015 NC</p>
-                        <p>You Will Receive: 0.24985 SC</p>
+                        <p>Exchange Rate: <span id="exchange-rate">1 NC = 10 SC</span></p>
+                        <p>Transaction Fee: <span id="transaction-fee">0.00015 NC</span></p>
+                        <p>You Will Receive: <span id="receive-amount">0.00000</span></p>
                     </div>
                     
-                    <button class="btn btn-warning btn-block">🔄 Confirm Swap</button>
+                    <button class="btn btn-warning btn-block" id="confirm-swap">🔄 Confirm Swap</button>
                 </div>
             </div>
             
@@ -481,17 +482,17 @@
                     
                     <div class="referral-code">
                         <p>Your unique referral code:</p>
-                        <div class="code">AVATAR-1234-XYZ</div>
-                        <button class="btn">📋 Copy Code</button>
+                        <div class="code" id="ref-code">LOADING...</div>
+                        <button class="btn" id="copy-ref">📋 Copy Code</button>
                     </div>
                     
                     <p>For each friend who joins using your code, you'll receive <strong>0.0005 NC</strong>.</p>
                     
                     <h4 class="card-title">📊 Referral Stats</h4>
-                    <p>Total Referrals: 3</p>
-                    <p>Total Earned: 0.0015 NC</p>
+                    <p>Total Referrals: <span id="ref-count">0</span></p>
+                    <p>Total Earned: <span id="ref-earned">0</span> NC</p>
                     
-                    <button class="btn btn-success btn-block">📤 Share Referral Link</button>
+                    <button class="btn btn-success btn-block" id="share-ref">📤 Share Referral Link</button>
                 </div>
             </div>
             
@@ -502,56 +503,140 @@
                     
                     <div class="form-group">
                         <label class="form-label">Select Coin:</label>
-                        <select class="form-input">
-                            <option>Normal Coin (NC)</option>
-                            <option>Silver Coin (SC)</option>
-                            <option>Gold Coin (GC)</option>
-                            <option>Diamond Coin (DC)</option>
-                            <option>SKA Coin</option>
+                        <select class="form-input" id="withdraw-coin">
+                            <option value="nc">Normal Coin (NC)</option>
+                            <option value="sc">Silver Coin (SC)</option>
+                            <option value="gc">Gold Coin (GC)</option>
+                            <option value="dc">Diamond Coin (DC)</option>
+                            <option value="ska">SKA Coin</option>
                         </select>
                     </div>
                     
                     <div class="form-group">
                         <label class="form-label">Amount:</label>
-                        <input type="number" class="form-input" placeholder="Enter amount">
+                        <input type="number" class="form-input" id="withdraw-amount" placeholder="Enter amount">
                     </div>
                     
                     <div class="form-group">
                         <label class="form-label">Withdrawal Method:</label>
-                        <select class="form-input">
-                            <option>Telebirr</option>
-                            <option>Airtime</option>
-                            <option>Bank Transfer</option>
+                        <select class="form-input" id="withdraw-method">
+                            <option value="telebirr">Telebirr</option>
+                            <option value="airtime">Airtime</option>
+                            <option value="bank">Bank Transfer</option>
                         </select>
                     </div>
                     
                     <div class="form-group">
                         <label class="form-label">Recipient Details:</label>
-                        <input type="text" class="form-input" placeholder="Phone number or account details">
+                        <input type="text" class="form-input" id="withdraw-details" placeholder="Phone number or account details">
                     </div>
                     
                     <div class="card">
                         <h4>Withdrawal Summary</h4>
-                        <p>Amount: 25.00 ETB</p>
-                        <p>Fee: 2.00 ETB</p>
-                        <p>You'll Receive: 23.00 ETB</p>
+                        <p>Amount: <span id="withdraw-summary-amount">0.00</span> ETB</p>
+                        <p>Fee: <span id="withdraw-fee">2.00</span> ETB</p>
+                        <p>You'll Receive: <span id="withdraw-receive">0.00</span> ETB</p>
                     </div>
                     
-                    <button class="btn btn-success btn-block">💳 Request Withdrawal</button>
+                    <button class="btn btn-success btn-block" id="request-withdraw">💳 Request Withdrawal</button>
                 </div>
             </div>
         </div>
         
         <footer>
-            <p>Avatar Bet Game © 2025 | Cryptocurrency Mini App</p>
+            <p>5COIN - Avatar Bet Game © 2025 | Collect coins and earn rewards!</p>
         </footer>
     </div>
 
     <script>
         // Initialize Telegram Web App
         let tg = window.Telegram.WebApp;
+        
+        // Expand the app to full screen
         tg.expand();
+        
+        // Enable the closing confirmation
         tg.enableClosingConfirmation();
+        
+        // Get user data from Telegram
+        const user = tg.initDataUnsafe.user;
+        const userId = user ? user.id : Math.floor(Math.random() * 1000000);
+        const userName = user ? user.first_name : "Guest";
+        const userUsername = user ? user.username : "";
+        
+        // Display user name
+        document.getElementById('user-name').textContent = userName;
+        
+        // Generate a referral code based on user ID
+        const refCode = `5COIN-${userId.toString(16).toUpperCase()}`;
+        document.getElementById('ref-code').textContent = refCode;
+        
+        // User data structure
+        let userData = {
+            userId: userId,
+            userName: userName,
+            userUsername: userUsername,
+            coins: {
+                nc: 0,
+                sc: 0,
+                gc: 0,
+                dc: 0,
+                ska: 0
+            },
+            referralCode: refCode,
+            referrals: 0,
+            earned: 0
+        };
+        
+        // Coin values in ETB
+        const coinValues = {
+            nc: 2.00,    // 0.01 NC ≈ 2 ETB
+            sc: 2000.00, // 0.001 SC ≈ 2 ETB
+            gc: 20000.00, // 0.0001 GC ≈ 2 ETB
+            dc: 200000.00, // 0.00001 DC ≈ 2 ETB
+            ska: 2000000.00 // 0.000001 SKA ≈ 2 ETB
+        };
+        
+        // Exchange rates
+        const exchangeRates = {
+            nc: { sc: 10, gc: 100, dc: 1000, ska: 10000 },
+            sc: { nc: 0.1, gc: 10, dc: 100, ska: 1000 },
+            gc: { nc: 0.01, sc: 0.1, dc: 10, ska: 100 },
+            dc: { nc: 0.001, sc: 0.01, gc: 0.1, ska: 10 },
+            ska: { nc: 0.0001, sc: 0.001, gc: 0.01, dc: 0.1 }
+        };
+        
+        // Transaction fee percentage
+        const transactionFee = 0.006; // 0.6%
+        
+        // Update UI with user data
+        function updateUserData() {
+            // Update wallet badges
+            document.getElementById('nc-amount').textContent = userData.coins.nc.toFixed(4);
+            document.getElementById('sc-amount').textContent = userData.coins.sc.toFixed(4);
+            document.getElementById('gc-amount').textContent = userData.coins.gc.toFixed(4);
+            
+            // Update dashboard
+            document.getElementById('dashboard-nc').textContent = userData.coins.nc.toFixed(4);
+            document.getElementById('dashboard-sc').textContent = userData.coins.sc.toFixed(4);
+            document.getElementById('dashboard-gc').textContent = userData.coins.gc.toFixed(4);
+            document.getElementById('dashboard-dc').textContent = userData.coins.dc.toFixed(4);
+            document.getElementById('dashboard-ska').textContent = userData.coins.ska.toFixed(4);
+            
+            // Update ETB values
+            document.getElementById('nc-etb').textContent = (userData.coins.nc * coinValues.nc).toFixed(2);
+            document.getElementById('sc-etb').textContent = (userData.coins.sc * coinValues.sc).toFixed(2);
+            document.getElementById('gc-etb').textContent = (userData.coins.gc * coinValues.gc).toFixed(2);
+            document.getElementById('dc-etb').textContent = (userData.coins.dc * coinValues.dc).toFixed(2);
+            document.getElementById('ska-etb').textContent = (userData.coins.ska * coinValues.ska).toFixed(2);
+            
+            // Update referral stats
+            document.getElementById('ref-count').textContent = userData.referrals;
+            document.getElementById('ref-earned').textContent = (userData.referrals * 0.0005).toFixed(4);
+        }
+        
+        // Initialize the app
+        updateUserData();
         
         // Tab navigation
         document.querySelectorAll('.nav-tab').forEach(tab => {
@@ -564,62 +649,245 @@
             });
         });
         
-        // Simulate user data
-        const userData = {
-            username: "User1234",
-            coins: {
-                nc: 12.45,
-                sc: 0.34,
-                gc: 0.02,
-                dc: 0,
-                ska: 0
-            },
-            referralCode: "AVATAR-1234-XYZ",
-            referrals: 3
-        };
-        
-        // Update UI with user data
-        function updateUserData() {
-            document.querySelector('.user span').textContent = `👤 ${userData.username}`;
-            document.querySelector('.coin-badge.nc').innerHTML = `<div class="coin-icon nc"></div> NC: ${userData.coins.nc.toFixed(2)}`;
-            document.querySelector('.coin-badge.sc').innerHTML = `<div class="coin-icon sc"></div> SC: ${userData.coins.sc.toFixed(2)}`;
-            document.querySelector('.coin-badge.gc').innerHTML = `<div class="coin-icon gc"></div> GC: ${userData.coins.gc.toFixed(2)}`;
+        // Claim free coins
+        document.getElementById('claim-coins').addEventListener('click', function() {
+            userData.coins.nc += 2;
+            userData.coins.sc += 1;
+            userData.coins.gc += 1;
+            userData.coins.dc += 0.5;
+            userData.coins.ska += 0.5;
+            updateUserData();
             
-            document.querySelector('.code').textContent = userData.referralCode;
-            document.querySelector('#referral p:nth-child(3)').textContent = `Total Referrals: ${userData.referrals}`;
-            document.querySelector('#referral p:nth-child(4)').textContent = `Total Earned: ${(userData.referrals * 0.0005).toFixed(4)} NC`;
-        }
-        
-        // Initialize
-        updateUserData();
-        
-        // Add button functionality
-        document.querySelectorAll('button').forEach(button => {
-            button.addEventListener('click', function() {
-                if (this.textContent.includes('Receive 5 Free Coins')) {
-                    userData.coins.nc += 2;
-                    userData.coins.sc += 1;
-                    userData.coins.gc += 1;
-                    userData.coins.dc += 0.5;
-                    userData.coins.ska += 0.5;
-                    updateUserData();
-                    alert("You received 5 free coins! Check your wallet.");
-                } else if (this.textContent.includes('Copy Code')) {
-                    navigator.clipboard.writeText(userData.referralCode);
-                    alert("Referral code copied to clipboard!");
-                }
+            tg.showPopup({
+                title: "Coins Claimed!",
+                message: "You received 5 free coins! Check your wallet.",
+                buttons: [{ type: "ok" }]
             });
         });
         
-        // Simulate bet placement
-        document.querySelector('[data-tab="bet"] .btn').addEventListener('click', function() {
-            const amount = document.querySelector('[data-tab="bet"] input').value;
-            if (amount && parseFloat(amount) > 0) {
-                alert(`Bet placed successfully with ${amount} NC!`);
-            } else {
-                alert("Please enter a valid bet amount.");
-            }
+        // Copy referral code
+        document.getElementById('copy-ref').addEventListener('click', function() {
+            navigator.clipboard.writeText(refCode);
+            tg.showPopup({
+                title: "Copied!",
+                message: "Referral code copied to clipboard.",
+                buttons: [{ type: "ok" }]
+            });
         });
+        
+        // Share referral link
+        document.getElementById('share-ref').addEventListener('click', function() {
+            const shareUrl = `https://t.me/your_bot_username?start=${refCode}`;
+            tg.showPopup({
+                title: "Share Your Link",
+                message: `Share this link with friends to earn coins: ${shareUrl}`,
+                buttons: [{ type: "ok" }]
+            });
+        });
+        
+        // Calculate swap details
+        function calculateSwap() {
+            const fromCoin = document.getElementById('swap-from').value;
+            const toCoin = document.getElementById('swap-to').value;
+            const amount = parseFloat(document.getElementById('swap-amount').value) || 0;
+            
+            if (amount > 0) {
+                const rate = exchangeRates[fromCoin][toCoin];
+                const fee = amount * transactionFee;
+                const received = (amount - fee) * rate;
+                
+                document.getElementById('exchange-rate').textContent = `1 ${fromCoin.toUpperCase()} = ${rate} ${toCoin.toUpperCase()}`;
+                document.getElementById('transaction-fee').textContent = `${fee.toFixed(6)} ${fromCoin.toUpperCase()}`;
+                document.getElementById('receive-amount').textContent = received.toFixed(6);
+            }
+        }
+        
+        // Update swap details when inputs change
+        document.getElementById('swap-from').addEventListener('change', calculateSwap);
+        document.getElementById('swap-to').addEventListener('change', calculateSwap);
+        document.getElementById('swap-amount').addEventListener('input', calculateSwap);
+        
+        // Initialize swap calculation
+        calculateSwap();
+        
+        // Confirm swap
+        document.getElementById('confirm-swap').addEventListener('click', function() {
+            const fromCoin = document.getElementById('swap-from').value;
+            const toCoin = document.getElementById('swap-to').value;
+            const amount = parseFloat(document.getElementById('swap-amount').value) || 0;
+            
+            if (amount <= 0) {
+                tg.showPopup({
+                    title: "Error",
+                    message: "Please enter a valid amount to swap.",
+                    buttons: [{ type: "ok" }]
+                });
+                return;
+            }
+            
+            if (userData.coins[fromCoin] < amount) {
+                tg.showPopup({
+                    title: "Insufficient Balance",
+                    message: `You don't have enough ${fromCoin.toUpperCase()} to complete this swap.`,
+                    buttons: [{ type: "ok" }]
+                });
+                return;
+            }
+            
+            const fee = amount * transactionFee;
+            const rate = exchangeRates[fromCoin][toCoin];
+            const received = (amount - fee) * rate;
+            
+            // Update balances
+            userData.coins[fromCoin] -= amount;
+            userData.coins[toCoin] += received;
+            
+            updateUserData();
+            
+            tg.showPopup({
+                title: "Swap Successful!",
+                message: `You swapped ${amount.toFixed(4)} ${fromCoin.toUpperCase()} for ${received.toFixed(4)} ${toCoin.toUpperCase()}.`,
+                buttons: [{ type: "ok" }]
+            });
+        });
+        
+        // Place a bet
+        document.getElementById('place-bet').addEventListener('click', function() {
+            const coinType = document.getElementById('bet-coin-type').value;
+            const amount = parseFloat(document.getElementById('bet-amount').value) || 0;
+            const avatar = document.querySelector('.avatar-card.active')?.dataset.avatar;
+            
+            if (!avatar) {
+                tg.showPopup({
+                    title: "Select Avatar",
+                    message: "Please select an avatar to bet on.",
+                    buttons: [{ type: "ok" }]
+                });
+                return;
+            }
+            
+            if (amount <= 0) {
+                tg.showPopup({
+                    title: "Invalid Amount",
+                    message: "Please enter a valid bet amount.",
+                    buttons: [{ type: "ok" }]
+                });
+                return;
+            }
+            
+            if (userData.coins[coinType] < amount) {
+                tg.showPopup({
+                    title: "Insufficient Balance",
+                    message: `You don't have enough ${coinType.toUpperCase()} to place this bet.`,
+                    buttons: [{ type: "ok" }]
+                });
+                return;
+            }
+            
+            // For now, simulate a random outcome
+            const win = Math.random() > 0.5;
+            
+            if (win) {
+                const winAmount = amount * 1.8; // 80% profit on win
+                userData.coins[coinType] += winAmount;
+                
+                tg.showPopup({
+                    title: "You Won!",
+                    message: `Congratulations! You won ${winAmount.toFixed(4)} ${coinType.toUpperCase()}!`,
+                    buttons: [{ type: "ok" }]
+                });
+            } else {
+                userData.coins[coinType] -= amount;
+                
+                tg.showPopup({
+                    title: "You Lost",
+                    message: `Sorry, you lost ${amount.toFixed(4)} ${coinType.toUpperCase()}. Try again!`,
+                    buttons: [{ type: "ok" }]
+                });
+            }
+            
+            updateUserData();
+        });
+        
+        // Select avatar for betting
+        document.querySelectorAll('.avatar-card').forEach(card => {
+            card.addEventListener('click', function() {
+                document.querySelectorAll('.avatar-card').forEach(c => c.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+        
+        // Withdrawal calculation
+        function calculateWithdrawal() {
+            const coinType = document.getElementById('withdraw-coin').value;
+            const amount = parseFloat(document.getElementById('withdraw-amount').value) || 0;
+            
+            if (amount > 0) {
+                const etbValue = amount * coinValues[coinType];
+                const fee = etbValue >= 25 ? 2 : etbValue * 0.08; // 2 ETB fee for 25+ ETB, 8% for less
+                const received = etbValue - fee;
+                
+                document.getElementById('withdraw-summary-amount').textContent = etbValue.toFixed(2);
+                document.getElementById('withdraw-fee').textContent = fee.toFixed(2);
+                document.getElementById('withdraw-receive').textContent = received.toFixed(2);
+            }
+        }
+        
+        // Update withdrawal details when inputs change
+        document.getElementById('withdraw-coin').addEventListener('change', calculateWithdrawal);
+        document.getElementById('withdraw-amount').addEventListener('input', calculateWithdrawal);
+        
+        // Request withdrawal
+        document.getElementById('request-withdraw').addEventListener('click', function() {
+            const coinType = document.getElementById('withdraw-coin').value;
+            const amount = parseFloat(document.getElementById('withdraw-amount').value) || 0;
+            const method = document.getElementById('withdraw-method').value;
+            const details = document.getElementById('withdraw-details').value;
+            
+            if (amount <= 0) {
+                tg.showPopup({
+                    title: "Invalid Amount",
+                    message: "Please enter a valid withdrawal amount.",
+                    buttons: [{ type: "ok" }]
+                });
+                return;
+            }
+            
+            if (userData.coins[coinType] < amount) {
+                tg.showPopup({
+                    title: "Insufficient Balance",
+                    message: `You don't have enough ${coinType.toUpperCase()} to make this withdrawal.`,
+                    buttons: [{ type: "ok" }]
+                });
+                return;
+            }
+            
+            if (!details) {
+                tg.showPopup({
+                    title: "Missing Details",
+                    message: "Please enter your recipient details.",
+                    buttons: [{ type: "ok" }]
+                });
+                return;
+            }
+            
+            const etbValue = amount * coinValues[coinType];
+            const fee = etbValue >= 25 ? 2 : etbValue * 0.08;
+            const received = etbValue - fee;
+            
+            tg.showPopup({
+                title: "Withdrawal Requested",
+                message: `Your withdrawal request for ${received.toFixed(2)} ETB has been submitted. It will be processed within 24 hours.`,
+                buttons: [{ type: "ok" }]
+            });
+            
+            // Update balance
+            userData.coins[coinType] -= amount;
+            updateUserData();
+        });
+        
+        // Initialize withdrawal calculation
+        calculateWithdrawal();
     </script>
 </body>
 </html>
