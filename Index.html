@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Avatar Bet Game - Cryptocurrency Mini App</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --secondary: #a29bfe;
+            --accent: #00cec9;
+            --dark: #2d3436;
+            --light: #f5f6fa;
+            --success: #00b894;
+            --warning: #fdcb6e;
+            --danger: #d63031;
+            --nc-color: #3498db;
+            --sc-color: #bdc3c7;
+            --gc-color: #f1c40f;
+            --dc-color: #9b59b6;
+            --ska-color: #1abc9c;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: var(--light);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+        
+        header {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            color: white;
+        }
+        
+        .user-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .wallet {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .coin-badge {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 5px 10px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .coin-icon {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+        }
+        
+        .nc { background: var(--nc-color); }
+        .sc { background: var(--sc-color); }
+        .gc { background: var(--gc-color); }
+        .dc { background: var(--dc-color); }
+        .ska { background: var(--ska-color); }
+        
+        .app-content {
+            padding: 20px;
+        }
+        
+        .nav-tabs {
+            display: flex;
+            overflow-x: auto;
+            gap: 5px;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .nav-tab {
+            padding: 10px 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.3s;
+        }
+        
+        .nav-tab.active {
+            background: var(--primary);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .card {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .card-title {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .card-title i {
+            font-size: 1.4rem;
+        }
+        
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+        
+        .btn-block {
+            display: block;
+            width: 100%;
+            text-align: center;
+        }
+        
+        .btn-success { background: var(--success); }
+        .btn-warning { background: var(--warning); color: var(--dark); }
+        .btn-danger { background: var(--danger); }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 12px 15px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(0, 0, 0, 0.2);
+            color: white;
+            font-size: 1rem;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        
+        .coin-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .coin-card {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 15px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        
+        .coin-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .coin-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .referral-code {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .code {
+            font-size: 1.5rem;
+            letter-spacing: 2px;
+            margin: 10px 0;
+            color: var(--accent);
+            font-weight: bold;
+        }
+        
+        .market-list {
+            list-style: none;
+        }
+        
+        .market-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .avatar-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .avatar-card {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .avatar-card:hover {
+            transform: scale(1.05);
+            background: rgba(0, 0, 0, 0.4);
+        }
+        
+        .avatar-img {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin-bottom: 10px;
+            object-fit: cover;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            margin-top: 30px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 600px) {
+            .coin-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .avatar-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Avatar Bet Game</h1>
+            <p>Collect, trade, and win with cryptocurrency!</p>
+        </header>
+        
+        <div class="user-info">
+            <div class="user">
+                <span>👤 User1234</span>
+            </div>
+            <div class="wallet">
+                <div class="coin-badge"><div class="coin-icon nc"></div> NC: 12.45</div>
+                <div class="coin-badge"><div class="coin-icon sc"></div> SC: 0.34</div>
+                <div class="coin-badge"><div class="coin-icon gc"></div> GC: 0.02</div>
+            </div>
+        </div>
+        
+        <div class="app-content">
+            <div class="nav-tabs">
+                <div class="nav-tab active" data-tab="dashboard">Dashboard</div>
+                <div class="nav-tab" data-tab="bet">Place Bets</div>
+                <div class="nav-tab" data-tab="swap">Swap Coins</div>
+                <div class="nav-tab" data-tab="market">Marketplace</div>
+                <div class="nav-tab" data-tab="referral">Refer Friends</div>
+                <div class="nav-tab" data-tab="withdraw">Withdraw</div>
+            </div>
+            
+            <!-- Dashboard Tab -->
+            <div class="tab-content active" id="dashboard">
+                <div class="card">
+                    <h3 class="card-title">💰 Your Crypto Portfolio</h3>
+                    <div class="coin-grid">
+                        <div class="coin-card">
+                            <div class="coin-icon nc"></div>
+                            <div class="coin-name">Normal Coin (NC)</div>
+                            <div class="coin-value">12.45</div>
+                            <div>≈ 248.99 ETB</div>
+                        </div>
+                        <div class="coin-card">
+                            <div class="coin-icon sc"></div>
+                            <div class="coin-name">Silver Coin (SC)</div>
+                            <div class="coin-value">0.34</div>
+                            <div>≈ 680.00 ETB</div>
+                        </div>
+                        <div class="coin-card">
+                            <div class="coin-icon gc"></div>
+                            <div class="coin-name">Gold Coin (GC)</div>
+                            <div class="coin-value">0.02</div>
+                            <div>≈ 400.00 ETB</div>
+                        </div>
+                        <div class="coin-card">
+                            <div class="coin-icon dc"></div>
+                            <div class="coin-name">Diamond Coin (DC)</div>
+                            <div class="coin-value">0.00</div>
+                            <div>≈ 0.00 ETB</div>
+                        </div>
+                        <div class="coin-card">
+                            <div class="coin-icon ska"></div>
+                            <div class="coin-name">SKA Coin</div>
+                            <div class="coin-value">0.00</div>
+                            <div>≈ 0.00 ETB</div>
+                        </div>
+                    </div>
+                    <button class="btn btn-block">💰 Receive 5 Free Coins</button>
+                </div>
+                
+                <div class="card">
+                    <h3 class="card-title">🏆 Recent Bets</h3>
+                    <p>You haven't placed any bets yet.</p>
+                    <button class="btn btn-block" data-tab="bet">Place Your First Bet</button>
+                </div>
+            </div>
+            
+            <!-- Bet Tab -->
+            <div class="tab-content" id="bet">
+                <div class="card">
+                    <h3 class="card-title">🎯 Select Avatar to Bet On</h3>
+                    <div class="avatar-grid">
+                        <div class="avatar-card">
+                            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='40' r='30' fill='%23%23f39c12'/%3E%3Ccircle cx='50' cy='100' r='40' fill='%23%232ecc71'/%3E%3C/svg%3E" class="avatar-img">
+                            <div>Warrior</div>
+                        </div>
+                        <div class="avatar-card">
+                            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='40' r='30' fill='%23%239b59b6'/%3E%3Ccircle cx='50' cy='100' r='40' fill='%23%233498db'/%3E%3C/svg%3E" class="avatar-img">
+                            <div>Mage</div>
+                        </div>
+                        <div class="avatar-card">
+                            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='40' r='30' fill='%23%23e74c3c'/%3E%3Ccircle cx='50' cy='100' r='40' fill='%23%23e67e22'/%3E%3C/svg%3E" class="avatar-img">
+                            <div>Archer</div>
+                        </div>
+                        <div class="avatar-card">
+                            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='40' r='30' fill='%23%23343a40'/%3E%3Ccircle cx='50' cy='100' r='40' fill='%23%237f8c8d'/%3E%3C/svg%3E" class="avatar-img">
+                            <div>Rogue</div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Select Coin Type:</label>
+                        <select class="form-input">
+                            <option>Normal Coin (NC)</option>
+                            <option>Silver Coin (SC)</option>
+                            <option>Gold Coin (GC)</option>
+                            <option>Diamond Coin (DC)</option>
+                            <option>SKA Coin</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Amount to Bet:</label>
+                        <input type="number" class="form-input" placeholder="Enter amount" step="0.0001">
+                    </div>
+                    
+                    <button class="btn btn-success btn-block">🎲 Place Bet</button>
+                </div>
+            </div>
+            
+            <!-- Swap Tab -->
+            <div class="tab-content" id="swap">
+                <div class="card">
+                    <h3 class="card-title">🔄 Coin Swap</h3>
+                    
+                    <div class="form-group">
+                        <label class="form-label">From:</label>
+                        <select class="form-input">
+                            <option>Normal Coin (NC)</option>
+                            <option>Silver Coin (SC)</option>
+                            <option>Gold Coin (GC)</option>
+                            <option>Diamond Coin (DC)</option>
+                            <option>SKA Coin</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">To:</label>
+                        <select class="form-input">
+                            <option>Silver Coin (SC)</option>
+                            <option>Gold Coin (GC)</option>
+                            <option>Diamond Coin (DC)</option>
+                            <option>SKA Coin</option>
+                            <option>Normal Coin (NC)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Amount:</label>
+                        <input type="number" class="form-input" placeholder="Minimum 0.025 NC" step="0.0001">
+                    </div>
+                    
+                    <div class="card">
+                        <h4>Transaction Details</h4>
+                        <p>Exchange Rate: 1 NC = 10 SC</p>
+                        <p>Transaction Fee: 0.00015 NC</p>
+                        <p>You Will Receive: 0.24985 SC</p>
+                    </div>
+                    
+                    <button class="btn btn-warning btn-block">🔄 Confirm Swap</button>
+                </div>
+            </div>
+            
+            <!-- Referral Tab -->
+            <div class="tab-content" id="referral">
+                <div class="card">
+                    <h3 class="card-title">👥 Refer Friends & Earn</h3>
+                    
+                    <div class="referral-code">
+                        <p>Your unique referral code:</p>
+                        <div class="code">AVATAR-1234-XYZ</div>
+                        <button class="btn">📋 Copy Code</button>
+                    </div>
+                    
+                    <p>For each friend who joins using your code, you'll receive <strong>0.0005 NC</strong>.</p>
+                    
+                    <h4 class="card-title">📊 Referral Stats</h4>
+                    <p>Total Referrals: 3</p>
+                    <p>Total Earned: 0.0015 NC</p>
+                    
+                    <button class="btn btn-success btn-block">📤 Share Referral Link</button>
+                </div>
+            </div>
+            
+            <!-- Withdraw Tab -->
+            <div class="tab-content" id="withdraw">
+                <div class="card">
+                    <h3 class="card-title">💸 Withdraw Funds</h3>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Select Coin:</label>
+                        <select class="form-input">
+                            <option>Normal Coin (NC)</option>
+                            <option>Silver Coin (SC)</option>
+                            <option>Gold Coin (GC)</option>
+                            <option>Diamond Coin (DC)</option>
+                            <option>SKA Coin</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Amount:</label>
+                        <input type="number" class="form-input" placeholder="Enter amount">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Withdrawal Method:</label>
+                        <select class="form-input">
+                            <option>Telebirr</option>
+                            <option>Airtime</option>
+                            <option>Bank Transfer</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Recipient Details:</label>
+                        <input type="text" class="form-input" placeholder="Phone number or account details">
+                    </div>
+                    
+                    <div class="card">
+                        <h4>Withdrawal Summary</h4>
+                        <p>Amount: 25.00 ETB</p>
+                        <p>Fee: 2.00 ETB</p>
+                        <p>You'll Receive: 23.00 ETB</p>
+                    </div>
+                    
+                    <button class="btn btn-success btn-block">💳 Request Withdrawal</button>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>Avatar Bet Game © 2025 | Cryptocurrency Mini App</p>
+        </footer>
+    </div>
+
+    <script>
+        // Initialize Telegram Web App
+        let tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.enableClosingConfirmation();
+        
+        // Tab navigation
+        document.querySelectorAll('.nav-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
+            });
+        });
+        
+        // Simulate user data
+        const userData = {
+            username: "User1234",
+            coins: {
+                nc: 12.45,
+                sc: 0.34,
+                gc: 0.02,
+                dc: 0,
+                ska: 0
+            },
+            referralCode: "AVATAR-1234-XYZ",
+            referrals: 3
+        };
+        
+        // Update UI with user data
+        function updateUserData() {
+            document.querySelector('.user span').textContent = `👤 ${userData.username}`;
+            document.querySelector('.coin-badge.nc').innerHTML = `<div class="coin-icon nc"></div> NC: ${userData.coins.nc.toFixed(2)}`;
+            document.querySelector('.coin-badge.sc').innerHTML = `<div class="coin-icon sc"></div> SC: ${userData.coins.sc.toFixed(2)}`;
+            document.querySelector('.coin-badge.gc').innerHTML = `<div class="coin-icon gc"></div> GC: ${userData.coins.gc.toFixed(2)}`;
+            
+            document.querySelector('.code').textContent = userData.referralCode;
+            document.querySelector('#referral p:nth-child(3)').textContent = `Total Referrals: ${userData.referrals}`;
+            document.querySelector('#referral p:nth-child(4)').textContent = `Total Earned: ${(userData.referrals * 0.0005).toFixed(4)} NC`;
+        }
+        
+        // Initialize
+        updateUserData();
+        
+        // Add button functionality
+        document.querySelectorAll('button').forEach(button => {
+            button.addEventListener('click', function() {
+                if (this.textContent.includes('Receive 5 Free Coins')) {
+                    userData.coins.nc += 2;
+                    userData.coins.sc += 1;
+                    userData.coins.gc += 1;
+                    userData.coins.dc += 0.5;
+                    userData.coins.ska += 0.5;
+                    updateUserData();
+                    alert("You received 5 free coins! Check your wallet.");
+                } else if (this.textContent.includes('Copy Code')) {
+                    navigator.clipboard.writeText(userData.referralCode);
+                    alert("Referral code copied to clipboard!");
+                }
+            });
+        });
+        
+        // Simulate bet placement
+        document.querySelector('[data-tab="bet"] .btn').addEventListener('click', function() {
+            const amount = document.querySelector('[data-tab="bet"] input').value;
+            if (amount && parseFloat(amount) > 0) {
+                alert(`Bet placed successfully with ${amount} NC!`);
+            } else {
+                alert("Please enter a valid bet amount.");
+            }
+        });
+    </script>
+</body>
+</html>
